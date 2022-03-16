@@ -1,0 +1,27 @@
+main:
+    popq %rax
+    rrmovq %rax, %rdi   #suurin
+    rrmovq %rax, %rsi   #pienin
+    jmp vertailu
+vertailu:
+    rrmovq %rsp, %r9    #
+    rrmovq %rbp, %r10   #Pinon alku ja loppu väliaikaisiin rekistereihin
+    subq %r9, %r10
+    jle lopeta          #Lopetetaan jos pino tyhjä
+    popq %rax
+    rrmovq %rax, %r11
+    subq %rsi, %r11
+    jl pienin
+    rrmovq %rax, %r11
+    subq %rdi, %r11
+    jg suurin
+    jmp vertailu
+pienin:
+    rrmovq %rax, %rsi
+    jmp vertailu
+suurin:
+    rrmovq %rax, %rdi
+    jmp vertailu
+lopeta:
+    halt
+    

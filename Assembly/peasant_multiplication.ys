@@ -1,0 +1,24 @@
+#.pos 0
+#irmovq $69016901,%r11
+#irmovq $12345678,%r12
+
+#irmovq $1337,%r11
+#irmovq $7331,%r12
+main:                           # alustetaan aloitus- ja lopetusmaski
+    irmovq $1, %rcx             # ...000000001
+    irmovq $2147483648 , %rsp   # OSRS max cash stack
+    jmp mult
+mult:                           # kertolasku
+    rrmovq %rcx, %rdx           # aloitusmaski temp rekisteriin
+    andq %r11, %rdx             
+    subq %rbx, %rdx             # |tarkistetaan onko %rdx 0
+    je bitshift                 # |
+    addq %r12, %rax             # lisätään tulokseen
+    jmp bitshift
+bitshift:
+    rrmovq %rsp, %rbp           # lopetusmaski temp rekisteriin
+    addq %rcx, %rcx             # shiftataan aloitusrekisteriä vasemmalle
+    addq %r12, %r12             # kerrottava = kerrottava + kerrottava
+    subq %rcx, %rbp             # vähennetään shiftattu rekisteri lopetusmaskin temp rekisteristä
+    jg mult                     # hypätään takaisin kertolaskuun jos shiftattu rekisteri ei ole ylittänyt lopetusmaskia
+    halt

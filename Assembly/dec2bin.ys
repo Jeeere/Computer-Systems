@@ -1,0 +1,34 @@
+.pos 0
+    irmovq pino,%rbp # pinon alkuosoite 
+    irmovq pino,%rsp # pinon ylimmän muistipaikan osoite 
+    irmovq $2,%rsi #jakaja
+    irmovq $9999,%rdi #jaettava
+    irmovq $0,%rax #tulos
+main:
+    irmovq $1,%rdx
+    addq %rdx,%rax      #lisätään kierros tulokseen
+    subq %rsi,%rdi      #vähennetään jakaja jaettavasta
+    jg main             #jos jaettava > 0
+    jl rem              #jos jakojäännös > 0
+    irmovq $0, %rcx     #jos jakojäännös = 0
+    pushq %rcx          #siirretään jakojäännös pinoon
+    jmp reset
+rem:
+    irmovq $1, %rcx     #jakojäännös 1
+    pushq %rcx          #siirretään jakojäännös pinoon
+    subq %rdx, %rax     #otetaan ylimääräinen 1 pois tuloksesta
+    jmp reset
+    jmp main            #siirrytään jakamaan
+reset:
+    rrmovq %rax, %rdi   #siirretään tulos jaettavaksi
+    addq %rax, %r14
+    je stop
+    irmovq $0,%rax      #tyhjennetään tulos
+    irmovq $0, %r14
+    jmp main
+stop:
+    irmovq $0,%rax      #tyhjennetään tulos
+    halt
+.pos 0x400
+pino:
+    

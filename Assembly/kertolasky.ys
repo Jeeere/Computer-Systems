@@ -1,0 +1,10 @@
+#    irmovq $15,%rsi
+#    irmovq $21,%rdi
+#    irmovq $0,%rax
+main:
+    irmovq $1,%rdx
+    addq %rdi,%rax
+    subq %rdx,%rsi
+    jne main
+    halt
+    

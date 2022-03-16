@@ -1,0 +1,11 @@
+#irmovq $12,%r13 #jaettava
+
+main:
+        irmovq $4,%rsi #jakaja
+    irmovq $1,%rdx
+    addq %rdx,%r14
+    subq %rsi,%r13
+    jge main
+    subq %rdx,%r14
+    halt
+    

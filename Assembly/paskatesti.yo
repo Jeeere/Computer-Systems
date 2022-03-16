@@ -1,0 +1,38 @@
+    irmovl $1000000,%r9 #jakaja1
+    irmovl $100,%r10 #jakaja2
+    irmovl $11943936,%r8 #jaettava
+    irmovl $0,%rax #tulos
+main:
+    rrmovl %r8,%r12
+    rrmovl %r8,%r13
+    irmovl $2147483648, %rsp
+    irmovl $1,%rdx
+    irmovl $10000,%rsi
+    irmovl $1, %rdi
+first:
+    addl %rdx,%rax
+    subl %r9,%r12
+    jg first
+    subl %rdx,%rax
+sec:
+    addl %rdx,%rcx
+    subl %r10,%r13
+    jg sec
+    subl %rdx,%rcx
+mult:        #rax*%rsi                   # kertolasku
+    rrmovl %rdi, %r14           # aloitusmaski temp rekisteriin
+    andl %rax, %r14             
+    subl %rbx, %r14             # |tarkistetaan onko %rdx 0
+    je bitshift                 # |
+    addl %rsi, %r11             # lisätään tulokseen
+    jmp bitshift
+bitshift:
+    rrmovl %rsp, %rbp           # lopetusmaski temp rekisteriin
+    addl %rdi, %rdi             # shiftataan aloitusrekisteriä vasemmalle
+    addl %rsi, %rsi             # kerrottava = kerrottava + kerrottava
+    subl %rdi, %rbp             # vähennetään shiftattu rekisteri lopetusmaskin temp rekisteristä
+    jg mult                     # hypätään takaisin kertolaskuun jos shiftattu rekisteri ei ole ylittänyt lopetusmaskia
+mid:
+    rrmovl %r11,%rax
+    subl %rax, %rcx
+    halt

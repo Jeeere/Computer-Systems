@@ -1,0 +1,11 @@
+    irmovq $1000000,%r9 #jakaja1
+    irmovq $100,%r10 #jakaja2
+    irmovq $11943936,%r8 #jaettava
+    irmovq $0,%rax #tulos
+main:
+    irmovq $1,%rdx
+    addq %rdx,%rax
+    subq %r9,%r8
+    jge main
+    subq %rdx,%rax
+    halt

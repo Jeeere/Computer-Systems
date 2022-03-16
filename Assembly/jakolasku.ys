@@ -1,0 +1,11 @@
+#    irmovq $2,%rsi #jakaja
+#    irmovq $10,%rdi #jaettava
+#    irmovq $0,%rax #tulos
+main:
+    irmovq $1,%rdx
+    addq %rdx,%rax
+    subq %rsi,%rdi
+    jge main
+    subq %rdx,%rax
+    halt
+    

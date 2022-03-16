@@ -1,0 +1,36 @@
+.pos 0x400
+taulukko:
+.align 8
+.quad 0x52
+.quad 0x42
+.quad 0x4d
+.quad 0x4f
+.quad 0x4a
+.quad 0x53
+.quad 0x59
+.quad 0x4f
+.quad 0x55
+.quad 0x42
+.quad 0x56
+.quad 0x43
+.quad 0x44
+.quad 0x4c
+.quad 0x54
+.quad 0x42
+.pos 0
+
+main:
+    irmovq 0x400,%r10 #muistipaikka
+    irmovq $0,%rax #tulos
+    irmovq $8,%rdx #sanan pituus
+    jmp loop
+loop:
+    irmovq $0,%rsi
+    irmovq $1,%rdi
+    addq %rdi,%rax
+    mrmovq (%r10), %r11
+    addq %rdx,%r10
+    subq %rsi,%r11
+    jne loop
+    subq %rdi,%rax
+    halt

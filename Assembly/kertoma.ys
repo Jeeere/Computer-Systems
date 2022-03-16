@@ -1,0 +1,21 @@
+#irmovq $5,%r8  #luku
+main:
+    irmovq 0x100,%rbp # Pinon alustus
+    irmovq 0x100,%rsp # 
+    rrmovq %r8,%r9 #kopioidaan kerrottava luku
+    irmovq $1,%rdx #kierrokset vähenee yhdellä
+    subq %rdx,%r9 #kertoja pienenee yhdellä
+    pushq %r9
+kertoma:
+    addq %r8,%rsi
+    subq %rdx,%r9 #kertoja pienenee yhdellä
+    jne kertoma
+    popq %r9
+    subq %rdx,%r9 #kertoja pienenee yhdellä
+    rrmovq %rsi,%r8
+    irmovq $0,%rsi
+    pushq %r9
+    jne kertoma
+    rrmovq %r8,%rax
+    halt
+    

@@ -1,0 +1,28 @@
+.pos 0
+    irmovq pino,%rbp # pinon alkuosoite 
+    irmovq pino,%rsp # pinon ylimmän muistipaikan osoite 
+    irmovq $1, %rdi
+    pushq %rdi
+    irmovq $2, %rdi
+    pushq %rdi
+    irmovq $3, %rdi
+    pushq %rdi
+main:
+    irmovq $1, %rsi
+    popq %rdi
+    addq %rdi, %rdx     #summa = rdx
+    addq %rsi, %rbx     #lkm = rbx
+    rrmovq %rbp, %r8
+    rrmovq %rsp, %r9
+    subq %r9, %r8
+    jne main
+    jmp jakolasku
+jakolasku:
+    addq %rsi,%rax
+    subq %rbx,%rdx
+    jge jakolasku
+    subq %rsi,%rax
+    halt
+    
+.pos 0x400
+pino:

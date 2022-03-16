@@ -1,0 +1,94 @@
+# nimi: Jere Leukkunen      opiskelijanumero: 2597689
+# Yhteistyötä tehty seuraavien kanssa: Casimir Saastamoinen, Topias Nykänen, Atte Marjakangas
+#
+# Pohdinta:
+# Jotta luvusta saadaan halutut 4 keskimmäistä numeroa, suoritetaan + ja - laskuja.
+#   Ensin vähennellään 10m / 1m, kunnes %rax menee negatiiviseksi, jotta päästään eroon mahdollisista kahdesta ensimmäisestä numerosta.
+#   Tämän jälkeen aletaan vähentämään 100k, 10k, 1k, 100, lisäten samalla uuteen siemenlukuun %r8 vastaavasti 1000, 100, 10, 1.
+#   Nyt uusi siemenluku on valmis.
+# Potenssiinkorotuksessa suurin määrä kierroksia on 27 (lasketaan kierroksien määrä lisäämällä rekisteriin 1 aina,
+#   kun loopataan aloitussiemenluvulla 9999 erillisessä ohjelmassa), jolloin käskyjen maksimimäärä on noin 270.
+#   Uuden siemenluvun laskemisessa maksimikierrosten määrä (aloitusluvulla 9999^2 = 99980001) taas kaikista loopeista on yhteensä 41, jolloin käskyjen yhteismäärä on noin 120.
+#   Suurin osa käskyistä tulee näistä kahdesta laskusta, joten oletetaan, että yhden siemenluvun laskemisessa käskyjä suoritetaan noin 400.
+#   Ohjelma laskee 5 siemenlukua, siispä käskyjen yhteismäärä olisi noin 5*400=2000
+# Uuden siemenluvun laskemisessa tein optimisaatiota siirtämällä alustuksia looppien ulkopuolelle. Tämä säästää 2 käskyä per loop joka tekee yhteensä 82 käskyä.
+#   Lisäksi laskin potenssiinkorotuksen lopetusmaskin vähän maksimiarvon (9999^2) yläpuolelle, joka säästää noin 250 käskyä alkuperäiseen tehokkaampaan kertolaskuun verrattuna.
+# Työtä olisi voinut vielä parantaa siistimällä koodia hieman sekä käyttämällä tiettyjä rekistereitä tietyissä osissa ohjelmaa.
+main:
+    irmovq $5, %r13             # Määrätään haluttavien siemenlukujen määräksi 5
+check_stack:                # Tarkistetaan onko pinossa vielä tilaa seuraavalle siemenluvulle
+    irmovq $1,%rdx              # Asetetaan vähentäjä = 1
+    subq %rdx, %r13             # Vähennetään 1 halutusta määrästä siemenlukuja, tässä tapauksessa viidestä
+    jge prep_power              # Jos tulos >= 0, hypätään laskemaan siemenluvun potenssia
+    halt                        # Lopetetaan, jos tulos < 0
+prep_power:                 # Suoritetaan valmistelut potenssiin korotusta varten
+    irmovq $1, %r11             # Aloitusmaski potenssiin korotukselle
+    irmovq $99980010 , %r10     # Lopetusmaski potenssiin korotukselle (vähän yli 9999^2)
+    rrmovq %r8, %r9             # Asetetaan kerrottava myös kertojaksi
+    irmovq $0, %rcx             # Alustetaan %rcx, %r12 ja %rax
+    irmovq $0, %r12
+    irmovq $0, %rax
+power:                      # Pääloop kertolaskulle
+    rrmovq %r11, %r14           # aloitusmaski väliaikaisrekisteriin
+    andq %r8, %r14             
+    subq %r12, %r14             # |tarkistetaan onko %r14 0
+    je power_shift              # |
+    addq %r9, %rax              # Lisätään kerrottava lopputulokseen
+power_shift:                # Bit shift loop kertolaskulle
+    rrmovq %r10, %rcx           # Lopetusmaski väliaikaisrekisteriin
+    addq %r11, %r11             # Shiftataan aloitusrekisteriä vasemmalle
+    addq %r9, %r9               # Kerrottava = kerrottava + kerrottava
+    subq %r11, %rcx             # Vähennetään shiftattu rekisteri lopetusmaskin väliaikaisrekisteristä
+    jg power                    # hypätään takaisin kertolaskuun jos shiftattu rekisteri ei ole ylittänyt lopetusmaskia
+prep_10m:                   # Suoritetaan valmistelut uuden siemenluvun hankintaa varten
+    irmovq $0,%r8               # Alustetaan %r8
+    irmovq $10000000, %rdx      # Vähentäjä = 10 000 000
+seed_10m:
+    subq %rdx, %rax             # Vähennetään vähentäjä potenssiin korotuksen tuloksesta
+    jge seed_10m                # Loopataan jos %rax >= 0 
+    addq %rdx ,%rax             # Lisätään vähentäjä takaisin jos %rax < 0
+prep_1m:
+    irmovq $1000000, %rdx       # Vähentäjä = 1 000 000
+seed_1m:
+    subq %rdx, %rax             # Toistetaan yllä olevaa eri vähentäjällä
+    jge seed_1m
+    addq %rdx ,%rax
+prep_100k:
+    irmovq $100000, %rdx        # Vähentäjä = 100 000
+    irmovq $1000, %rsi          # Lisättävä = 1000
+seed_100k:
+    addq %rsi, %r8
+    subq %rdx, %rax
+    jge seed_100k
+    subq %rsi, %r8
+    addq %rdx ,%rax
+prep_10k:
+    irmovq $10000, %rdx         # Vähentäjä = 10 000
+    irmovq $100, %rsi           # Lisättävä = 100
+seed_10k:
+    addq %rsi, %r8              # Nyt aletaan lisäämään lisättävä uuteen siemenlukuun %r8 aina kun suoritetaan vähennys
+    subq %rdx, %rax
+    jge seed_10k
+    addq %rdx ,%rax
+    subq %rsi, %r8              # Nyt myös vähennetään lisättävä jos %rax < 0
+prep_1k:
+    irmovq $1000, %rdx          # Vähentäjä = 1000
+    irmovq $10, %rsi            # Lisättävä = 10
+seed_1k:
+    addq %rsi, %r8              # Jatketaan yllä olevaa
+    subq %rdx, %rax
+    jge seed_1k
+    subq %rsi, %r8
+    addq %rdx ,%rax
+prep_100:
+    irmovq $100, %rdx           # Vähentäjä = 100
+    irmovq $1, %rsi             # Lisättävä = 1
+seed_100:
+    addq %rsi, %r8
+    subq %rdx, %rax
+    jge seed_100
+    subq %rsi, %r8              # Nyt %r8 on lopullinen seuraava siemenluku
+    addq %rdx ,%rax
+push:
+    pushq %r8                   # Siemenluku pinoon
+    jmp check_stack              # Hypätään takaisin uuden potenssin laskuun
